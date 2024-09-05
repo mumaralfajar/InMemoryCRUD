@@ -108,7 +108,7 @@ Successful Response (List of Employees):
           {
             "employeeID": 1,
             "fullName": "John Doe",
-            "birthDate": "1990-01-01T00:00:00"
+            "birthDate": "01-Jan-1990"
           }
         ]
       }
