@@ -115,17 +115,6 @@ Successful Response (List of Employees):
     }
    ```
 
-Error Response (Employee Not Found):
-
-   ```json
-    {
-      "status": false,
-      "message": "Employee not found",
-      "time": 1725570135430,
-      "data": null
-    }
-   ```
-
 #### Project Structure
 
 The project is structured in a way that separates concerns, making it easy to extend and maintain:
