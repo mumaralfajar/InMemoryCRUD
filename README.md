@@ -95,49 +95,49 @@ Here are the available API operations for managing employees:
 Successful Response (List of Employees):
 
    ```json
-{
-  "status": true,
-  "message": "Employees retrieved successfully",
-  "time": 1725574760527,
-  "data": {
-    "page": 1,
-    "size": 6,
-    "totalItems": 10,
-    "totalPages": 2,
-    "items": [
       {
-        "employeeID": 1001,
-        "fullName": "Adit",
-        "birthDate": "17-Aug-1954"
-      },
-      {
-        "employeeID": 1002,
-        "fullName": "Anton",
-        "birthDate": "18-Aug-1954"
-      },
-      {
-        "employeeID": 1003,
-        "fullName": "Amir",
-        "birthDate": "19-Aug-1954"
-      },
-      {
-        "employeeID": 1004,
-        "fullName": "Budi",
-        "birthDate": "20-Aug-1954"
-      },
-      {
-        "employeeID": 1005,
-        "fullName": "Bambang",
-        "birthDate": "21-Aug-1954"
-      },
-      {
-        "employeeID": 1006,
-        "fullName": "Cindy",
-        "birthDate": "22-Aug-1954"
+        "status": true,
+        "message": "Employees retrieved successfully",
+        "time": 1725574760527,
+        "data": {
+          "page": 1,
+          "size": 6,
+          "totalItems": 10,
+          "totalPages": 2,
+          "items": [
+            {
+              "employeeID": 1001,
+              "fullName": "Adit",
+              "birthDate": "17-Aug-1954"
+            },
+            {
+              "employeeID": 1002,
+              "fullName": "Anton",
+              "birthDate": "18-Aug-1954"
+            },
+            {
+              "employeeID": 1003,
+              "fullName": "Amir",
+              "birthDate": "19-Aug-1954"
+            },
+            {
+              "employeeID": 1004,
+              "fullName": "Budi",
+              "birthDate": "20-Aug-1954"
+            },
+            {
+              "employeeID": 1005,
+              "fullName": "Bambang",
+              "birthDate": "21-Aug-1954"
+            },
+            {
+              "employeeID": 1006,
+              "fullName": "Cindy",
+              "birthDate": "22-Aug-1954"
+            }
+          ]
+        }
       }
-    ]
-  }
-}
    ```
 
 #### Project Structure
