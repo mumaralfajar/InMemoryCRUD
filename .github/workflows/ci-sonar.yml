@@ -4,37 +4,86 @@ on:
   push:
     branches:
       - master
+  pull_request:
+    branches:
+      - develop
 
 jobs:
-  build-and-analyze:
+  build:
+    name: Build & Test
     runs-on: self-hosted
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Restore dependencies
-      run: dotnet restore
+      - name: Restore dependencies
+        run: dotnet restore
 
-    - name: Begin SonarQube analysis
-      shell: powershell
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      run: |
-        dotnet sonarscanner begin `
-          /k:"InMemoryCRUD" `
-          /d:sonar.host.url="http://localhost:9000" `
-          /d:sonar.login="$env:SONAR_TOKEN"
+      - name: Build
+        run: dotnet build --no-restore
 
-    - name: Build
-      run: dotnet build --no-restore
+      - name: Test with coverage
+        run: |
+          dotnet test --no-build --collect:"XPlat Code Coverage" \
+            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
-    - name: Test
-      run: dotnet test --no-build --collect:"XPlat Code Coverage"
+  analysis:
+    name: Review → Lint → Metrics → SonarQube
+    needs: build
+    runs-on: self-hosted
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: End SonarQube analysis
-      shell: powershell
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      run: |
-        dotnet sonarscanner end /d:sonar.login="$env:SONAR_TOKEN"
+      - name: Require approved review
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { data: reviews } = await github.pulls.listReviews({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number
+            });
+            if (!reviews.some(r => r.state === 'APPROVED')) {
+              core.setFailed('Pull request must have at least one APPROVED review.');
+            }
+
+      - name: Check code formatting
+        shell: powershell
+        run: |
+          dotnet tool install --global dotnet-format
+          dotnet format --verify-no-changes
+
+      - name: Count lines of code
+        shell: powershell
+        run: |
+          choco install cloc --no-confirm
+          cloc src/ > cloc-report.txt
+          cat cloc-report.txt
+
+      - name: Begin SonarQube analysis
+        shell: powershell
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          dotnet sonarscanner begin `
+            /k:"InMemoryCRUD" `
+            /d:sonar.host.url="http://localhost:9000" `
+            /d:sonar.login="$env:SONAR_TOKEN" `
+            /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
+
+      - name: Build for SonarQube
+        run: dotnet build --no-restore
+
+      - name: Test for SonarQube
+        run: |
+          dotnet test --no-build --collect:"XPlat Code Coverage" `
+            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+
+      - name: End SonarQube analysis
+        shell: powershell
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: dotnet sonarscanner end /d:sonar.login="$env:SONAR_TOKEN"
