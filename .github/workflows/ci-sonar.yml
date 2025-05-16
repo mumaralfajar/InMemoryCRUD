@@ -28,13 +28,20 @@ jobs:
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       run: |
-        dotnet sonarscanner begin /k:"InMemoryCRUD" /d:sonar.host.url="http://localhost:9000" /d:sonar.login=$SONAR_TOKEN
+        dotnet sonarscanner begin \
+          /k:"InMemoryCRUD" \
+          /d:sonar.host.url="http://localhost:9000" \
+          /d:sonar.login=$SONAR_TOKEN \
+          /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
 
     - name: Build
       run: dotnet build --no-restore
 
     - name: Test
-      run: dotnet test --no-build --collect:"XPlat Code Coverage"
+      run: dotnet test --no-build --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+
+    - name: Check coverage file
+      run: find . -name "coverage.opencover.xml"
 
     - name: End SonarQube analysis
       env:
