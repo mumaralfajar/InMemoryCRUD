@@ -38,7 +38,7 @@ jobs:
     - name: Test
       run: dotnet test --no-build --collect:"XPlat Code Coverage"
 
-    - name: End SonarQube analysis
+    - name: End SonarQube analysis 
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       run: dotnet sonarscanner end /d:sonar.login=$SONAR_TOKEN
