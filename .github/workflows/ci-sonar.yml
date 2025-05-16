@@ -14,31 +14,41 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Install .NET SDK manually
-      shell: pwsh
+      shell: powershell
       run: |
         Invoke-WebRequest -Uri https://dot.net/v1/dotnet-install.ps1 -OutFile dotnet-install.ps1
         ./dotnet-install.ps1 -Version 8.0.100 -InstallDir "$env:USERPROFILE\.dotnet"
         echo "$env:USERPROFILE\.dotnet" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
+    - name: Setup dotnet tools path
+      run: echo "$env:USERPROFILE\.dotnet\tools" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      shell: powershell
+
     - name: Install dotnet-sonarscanner tool
       run: dotnet tool install --global dotnet-sonarscanner
+      shell: powershell
 
     - name: Restore dependencies
       run: dotnet restore
+      shell: powershell
 
     - name: Begin SonarQube analysis
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       run: |
-        dotnet sonarscanner begin /k:"InMemoryCRUD" /d:sonar.host.url="http://localhost:9000" /d:sonar.login=$SONAR_TOKEN
+        dotnet sonarscanner begin /k:"InMemoryCRUD" /d:sonar.host.url="http://localhost:9000" /d:sonar.login=$env:SONAR_TOKEN
+      shell: powershell
 
     - name: Build
       run: dotnet build --no-restore
+      shell: powershell
 
     - name: Test
       run: dotnet test --no-build --collect:"XPlat Code Coverage"
+      shell: powershell
 
     - name: End SonarQube analysis
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      run: dotnet sonarscanner end /d:sonar.login=$SONAR_TOKEN
+      run: dotnet sonarscanner end /d:sonar.login=$env:SONAR_TOKEN
+      shell: powershell
