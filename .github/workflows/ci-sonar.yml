@@ -13,24 +13,23 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Install dotnet-sonarscanner tool if needed
-      shell: powershell
-      run: |
-        dotnet tool list -g | Select-String "dotnet-sonarscanner"
-        if ($LASTEXITCODE -ne 0) {
-          dotnet tool install --global dotnet-sonarscanner
-        } else {
-          Write-Host "dotnet-sonarscanner already installed, skipping installation."
-        }
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0'
+
+    - name: Install dotnet-sonarscanner tool
+      run: dotnet tool install --global dotnet-sonarscanner
 
     - name: Restore dependencies
       run: dotnet restore
 
     - name: Begin SonarQube analysis
+      shell: pwsh
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       run: |
-        dotnet sonarscanner begin /k:"InMemoryCRUD" /d:sonar.host.url="http://localhost:9000" /d:sonar.login=$SONAR_TOKEN
+        dotnet sonarscanner begin /k:"InMemoryCRUD" /d:sonar.host.url="http://localhost:9000" /d:sonar.login="$env:SONAR_TOKEN"
 
     - name: Build
       run: dotnet build --no-restore
@@ -38,7 +37,8 @@ jobs:
     - name: Test
       run: dotnet test --no-build --collect:"XPlat Code Coverage"
 
-    - name: End SonarQube analysis 
+    - name: End SonarQube analysis
+      shell: pwsh
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      run: dotnet sonarscanner end /d:sonar.login=$SONAR_TOKEN
+      run: dotnet sonarscanner end /d:sonar.login="$env:SONAR_TOKEN"
