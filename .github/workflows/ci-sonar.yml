@@ -13,14 +13,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '8.0'
-          install-dir: 'C:\\actions-dotnet'
-
-      - name: Add dotnet tools to PATH
-        run: echo "C:\\actions-dotnet" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      # НЕ ставим setup-dotnet, используем системный .NET
 
       - name: Install dotnet-sonarscanner tool
         run: dotnet tool install --global dotnet-sonarscanner
@@ -32,10 +25,7 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          dotnet sonarscanner begin `
-            /k:"InMemoryCRUD" `
-            /d:sonar.host.url="http://localhost:9000" `
-            /d:sonar.login=$env:SONAR_TOKEN
+          dotnet sonarscanner begin /k:"InMemoryCRUD" /d:sonar.host.url="http://localhost:9000" /d:sonar.login=$SONAR_TOKEN
 
       - name: Build
         run: dotnet build --no-restore
@@ -46,4 +36,4 @@ jobs:
       - name: End SonarQube analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: dotnet sonarscanner end /d:sonar.login=$env:SONAR_TOKEN
+        run: dotnet sonarscanner end /d:sonar.login=$SONAR_TOKEN
