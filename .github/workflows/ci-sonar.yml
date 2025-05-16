@@ -13,14 +13,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Setup .NET SDK
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: '8.0'
-
-    - name: Install dotnet-sonarscanner tool
-      run: dotnet tool install --global dotnet-sonarscanner
-
     - name: Restore dependencies
       run: dotnet restore
 
