@@ -17,11 +17,14 @@ jobs:
       run: dotnet restore
 
     - name: Begin SonarQube analysis
-      shell: pwsh
+      shell: powershell
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       run: |
-        dotnet sonarscanner begin /k:"InMemoryCRUD" /d:sonar.host.url="http://localhost:9000" /d:sonar.login="$env:SONAR_TOKEN"
+        dotnet sonarscanner begin `
+          /k:"InMemoryCRUD" `
+          /d:sonar.host.url="http://localhost:9000" `
+          /d:sonar.login="$env:SONAR_TOKEN"
 
     - name: Build
       run: dotnet build --no-restore
@@ -30,7 +33,8 @@ jobs:
       run: dotnet test --no-build --collect:"XPlat Code Coverage"
 
     - name: End SonarQube analysis
-      shell: pwsh
+      shell: powershell
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      run: dotnet sonarscanner end /d:sonar.login="$env:SONAR_TOKEN"
+      run: |
+        dotnet sonarscanner end /d:sonar.login="$env:SONAR_TOKEN"
