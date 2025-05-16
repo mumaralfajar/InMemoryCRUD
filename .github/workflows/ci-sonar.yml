@@ -10,40 +10,40 @@ jobs:
     runs-on: self-hosted
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Setup .NET SDK
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: '8.0'
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0'
+          install-dir: 'C:\\actions-dotnet'
 
-    - name: Install dotnet-sonarscanner tool
-      run: dotnet tool install --global dotnet-sonarscanner
+      - name: Add dotnet tools to PATH
+        run: echo "C:\\actions-dotnet" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
-    - name: Restore dependencies
-      run: dotnet restore
+      - name: Install dotnet-sonarscanner tool
+        run: dotnet tool install --global dotnet-sonarscanner
 
-    - name: Begin SonarQube analysis
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      run: |
-        dotnet sonarscanner begin \
-          /k:"InMemoryCRUD" \
-          /d:sonar.host.url="http://localhost:9000" \
-          /d:sonar.login=$SONAR_TOKEN \
-          /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
+      - name: Restore dependencies
+        run: dotnet restore
 
-    - name: Build
-      run: dotnet build --no-restore
+      - name: Begin SonarQube analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          dotnet sonarscanner begin `
+            /k:"InMemoryCRUD" `
+            /d:sonar.host.url="http://localhost:9000" `
+            /d:sonar.login=$env:SONAR_TOKEN
 
-    - name: Test
-      run: dotnet test --no-build --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+      - name: Build
+        run: dotnet build --no-restore
 
-    - name: Check coverage file
-      run: find . -name "coverage.opencover.xml"
+      - name: Test
+        run: dotnet test --no-build --collect:"XPlat Code Coverage"
 
-    - name: End SonarQube analysis
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      run: dotnet sonarscanner end /d:sonar.login=$SONAR_TOKEN
+      - name: End SonarQube analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: dotnet sonarscanner end /d:sonar.login=$env:SONAR_TOKEN
